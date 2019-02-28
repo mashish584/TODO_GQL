@@ -3,8 +3,6 @@ const { compareSync } = require("bcrypt");
 const { sign } = require("jsonwebtoken");
 const User = mongoose.model("User");
 
-User.collection.dropIndexes();
-
 const validateUserInput = (email, password) => {
 	if (email.trim().length === 0 || password.length === 0) {
 		throw new Error("Email and Password fields are required");
