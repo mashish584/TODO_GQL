@@ -1,7 +1,32 @@
 const express = require("express");
 const graphqlHTTP = require("express-graphql");
 const { buildSchema } = require("graphql");
+
+// errorHandler
+const {
+	catchAsyncErrors,
+	catch404Errors,
+	showErrorHandler
+} = require("./handlers/errorHandler");
+
+// resolvers
+const { createUser, authUser } = require("./resolvers/userResolver");
+
 const app = express();
+
+// cors
+app.use((req, res, next) => {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Methods", "POST,GET,OPTIONS");
+	res.header(
+		"Access-Control-Allow-Headers",
+		"Origin, X-Requested-With, Content-Type, Accept, Authorization"
+	);
+	if (req.method === "OPTIONS") {
+		return res.sendStatus(200);
+	}
+	next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -39,7 +64,6 @@ app.use(
 
 		type LoginData {
 			token : String!
-			message : String!
 		}
 		
 		type RootQuery{
@@ -59,9 +83,15 @@ app.use(
 			
 		}
 	`),
-		rootValue: "", //resolvers
+		rootValue: {
+			createUser: catchAsyncErrors(createUser),
+			auth: catchAsyncErrors(authUser)
+		},
 		graphiql: true
 	})
 );
+
+app.use(catch404Errors);
+app.use(showErrorHandler);
 
 module.exports = app;

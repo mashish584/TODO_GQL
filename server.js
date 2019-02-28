@@ -1,11 +1,12 @@
 require("dotenv").config({ path: "secret.env" });
 
 const mongoose = require("mongoose");
-
 mongoose
 	.connect(process.env.MONGO_URI, { useNewUrlParser: true })
 	.then(() => {
-		// model imports
+		// register model
+		require("./models/User");
+		require("./models/Todo");
 
 		const app = require("./app");
 		app.set("PORT", process.env.PORT);
@@ -18,3 +19,5 @@ mongoose
 		});
 	})
 	.catch(err => console.log(`Connection Failed - ${err.message}`));
+
+mongoose.set("useCreateIndex", true);
