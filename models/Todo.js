@@ -10,7 +10,10 @@ const TODOSchema = new mongoose.Schema(
 			type: mongoose.Types.ObjectId,
 			ref: "User"
 		},
-		status: String
+		status: {
+			type: String,
+			default: "none"
+		}
 	},
 	{
 		timestamps: true

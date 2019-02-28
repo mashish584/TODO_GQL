@@ -9,8 +9,8 @@ exports.catch404Errors = (req, res, next) => {
 exports.showErrorHandler = (err, req, res, next) => {
 	const { message, status } = err;
 	if (process.env.mode === "prod") {
-		return res.status(status).json({ message });
+		return res.status(status || 500).json({ message });
 	} else {
-		return res.status(status).json({ message, stack: err.stack });
+		return res.status(status || 500).json({ message, stack: err.stack });
 	}
 };

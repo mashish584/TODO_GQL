@@ -1,4 +1,5 @@
 const express = require("express");
+const { verify } = require("jsonwebtoken");
 const graphqlHTTP = require("express-graphql");
 const { buildSchema } = require("graphql");
 
@@ -11,6 +12,7 @@ const {
 
 // resolvers
 const { createUser, authUser } = require("./resolvers/userResolver");
+const { addTask, getTasks } = require("./resolvers/todoResolver");
 
 const app = express();
 
@@ -24,6 +26,22 @@ app.use((req, res, next) => {
 	);
 	if (req.method === "OPTIONS") {
 		return res.sendStatus(200);
+	}
+	next();
+});
+
+// getUser from request if exist
+app.use((req, res, next) => {
+	const authorizationToken = req.get("Authorization");
+	if (authorizationToken) {
+		try {
+			const user = verify(authorizationToken, process.env.SECRET);
+			if (user) {
+				req.userId = user.id;
+			}
+		} catch (err) {
+			throw new Error(err);
+		}
 	}
 	next();
 });
@@ -68,7 +86,7 @@ app.use(
 		
 		type RootQuery{
 			users : [User!]!
-			todos : [Todo!]!
+			getTodos(status:String) : [Todo!]!
 			auth(payload:userPayload) : LoginData!
 		}
 
@@ -85,7 +103,9 @@ app.use(
 	`),
 		rootValue: {
 			createUser: catchAsyncErrors(createUser),
-			auth: catchAsyncErrors(authUser)
+			auth: catchAsyncErrors(authUser),
+			createTask: catchAsyncErrors(addTask),
+			getTodos: catchAsyncErrors(getTasks)
 		},
 		graphiql: true
 	})
